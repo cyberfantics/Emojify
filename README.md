@@ -1,6 +1,6 @@
 # Emojify – Create Your Own Emoji with Deep Learning 🎭  
 
-![Emojify App](https://cyberfantics-emojify-app-siktsr.streamlit.app/)  
+![Emojify App](Emojify.png)  
 
 ## 📌 Project Overview  
 **Emojify** is a deep learning-based application that detects human facial expressions and maps them to corresponding emojis or avatars. This project utilizes **computer vision** and **deep learning** techniques to enhance user interactions through emotion-based emoji generation.  
