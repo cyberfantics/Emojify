@@ -21,7 +21,7 @@ emoji_dist = {
 }
 
 # Streamlit UI
-st.title("Emojify - Emotion Detection")
+st.title("Photo to Emoji - Emotion Detection")
 st.write("Upload an image or use your webcam to detect emotions and display corresponding emojis.")
 
 # Webcam input
@@ -52,11 +52,13 @@ if image_file is not None:
         top_3_emotions = [emotion_dict[i] for i in top_3_indices]  # Map to emotion names
 
         # Randomly select one of the top 3 emotions
-        detect_emotion = random.choice(top_3_emotions)
+        random_emotion = random.choice(top_3_emotions)
+
+        # Get the index of the selected random emotion
+        selected_index = [i for i in top_3_indices if emotion_dict[i] == random_emotion][0]
 
         # Display results
-        st.image(image, caption=f"Detected Emotion: {detect_emotion}", use_column_width=True)
-        st.image(emoji_dist[top_3_indices[np.where(top_3_emotions == detect_emotion)[0][0]]], 
-                 caption=f"Emoji: {detect_emotion}", width=200)
+        st.image(image, caption=f"Detected Emotion: {random_emotion}", use_column_width=True)
+        st.image(emoji_dist[selected_index], caption=f"Emoji: {random_emotion}", width=200)
     else:
         st.warning("No face detected. Please try again.")
