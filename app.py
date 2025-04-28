@@ -20,6 +20,10 @@ emoji_dist = {
     6: "./emojis/surprised.png"
 }
 
+# Softmax function to normalize predictions
+def softmax(x):
+    return np.exp(x) / np.sum(np.exp(x), axis=-1, keepdims=True)
+
 # Streamlit UI
 st.title("Photo to Emoji - Emotion Detection")
 st.write("Upload an image or use your webcam to detect emotions and display corresponding emojis.")
@@ -47,15 +51,21 @@ if image_file is not None:
         # Make emotion prediction
         prediction = emotion_model.predict(resized_img)
 
-        # Get the top 3 predicted emotions
-        top_3_indices = np.argsort(prediction[0])[-3:]  # Get the indices of the top 3 emotions
+        # Apply softmax to normalize the predictions to probabilities
+        normalized_predictions = softmax(prediction[0])
+
+        # Get the top 3 predicted emotions based on probability
+        top_3_indices = np.argsort(normalized_predictions)[-3:]  # Get the indices of the top 3 emotions
         top_3_emotions = [emotion_dict[i] for i in top_3_indices]  # Map to emotion names
+        top_3_probabilities = normalized_predictions[top_3_indices]  # Get corresponding probabilities
 
         # Randomly select one of the top 3 emotions
-        random_emotion = random.choice(top_3_emotions)
+        random_emotion = random.choices(top_3_emotions, weights=top_3_probabilities, k=1)[0]
 
-        # Display the top 3 emotions to debug
-        st.write("Top 3 Emotions:", top_3_emotions)
+        # Display the top 3 emotions and their probabilities for debugging
+        st.write(f"Top 3 Emotions (with probabilities):")
+        for emotion, prob in zip(top_3_emotions, top_3_probabilities):
+            st.write(f"{emotion}: {prob:.4f}")
 
         # Get the index of the selected random emotion
         selected_index = [i for i in top_3_indices if emotion_dict[i] == random_emotion][0]
