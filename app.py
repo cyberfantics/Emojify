@@ -54,6 +54,7 @@ if image_file is not None:
         # Randomly select one of the top 3 emotions
         random_emotion = random.choice(top_3_emotions)
 
+        st.write(top_3_emotions)
         # Get the index of the selected random emotion
         selected_index = [i for i in top_3_indices if emotion_dict[i] == random_emotion][0]
 
