@@ -37,18 +37,31 @@ if image_file is not None:
 
     if len(faces) > 0:
         x, y, w, h = faces[0]
-        roi_color = image[y:y+h, x:x+w]  # Extract face in color
-
-        # Resize to match model's expected input (224x224x3)
-        resized_img = cv2.resize(roi_color, (224, 224))
-        resized_img = np.expand_dims(resized_img, axis=0)  # Add batch dimension
+        roi_gray = gray_frame[y:y+h, x:x+w]  # Extract face in grayscale
+        resized_img = cv2.resize(roi_gray, (48, 48))  # Resize to 48x48
+        resized_img = resized_img / 255.0  # Normalize pixel values
+        resized_img = resized_img.reshape(1, 48, 48, 1)  # Add batch and channel dimensions
 
         # Make emotion prediction
         prediction = emotion_model.predict(resized_img)
         maxindex = int(np.argmax(prediction))
 
-        # Display results
-        st.image(image, caption=f"Detected Emotion: {emotion_dict[maxindex]}", use_column_width=True)
+        # Draw rectangle and label on the image
+        image_with_rectangle = image.copy()
+        cv2.rectangle(image_with_rectangle, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        cv2.putText(
+            image_with_rectangle, 
+            emotion_dict[maxindex], 
+            (x, y-10), 
+            cv2.FONT_HERSHEY_SIMPLEX, 
+            1, 
+            (0, 255, 0), 
+            2, 
+            cv2.LINE_AA
+        )
+
+        # Show the results
+        st.image(image_with_rectangle, caption=f"Detected Emotion: {emotion_dict[maxindex]}", use_column_width=True)
         st.image(emoji_dist[maxindex], caption=f"Emoji: {emotion_dict[maxindex]}", width=200)
     else:
         st.warning("No face detected. Please try again.")
