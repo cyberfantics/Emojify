@@ -54,12 +54,14 @@ if image_file is not None:
         # Randomly select one of the top 3 emotions
         random_emotion = random.choice(top_3_emotions)
 
-        st.write(top_3_emotions)
+        # Display the top 3 emotions to debug
+        st.write("Top 3 Emotions:", top_3_emotions)
+
         # Get the index of the selected random emotion
         selected_index = [i for i in top_3_indices if emotion_dict[i] == random_emotion][0]
 
         # Display results
         st.image(image, caption=f"Detected Emotion: {random_emotion}", use_column_width=True)
-        st.image(emoji_dist[random_emotion], caption=f"Emoji: {random_emotion}", width=200)
+        st.image(emoji_dist[selected_index], caption=f"Emoji: {random_emotion}", width=200)
     else:
         st.warning("No face detected. Please try again.")
