@@ -60,6 +60,6 @@ if image_file is not None:
 
         # Display results
         st.image(image, caption=f"Detected Emotion: {random_emotion}", use_column_width=True)
-        st.image(emoji_dist[selected_index], caption=f"Emoji: {random_emotion}", width=200)
+        st.image(emoji_dist[random_emotion], caption=f"Emoji: {random_emotion}", width=200)
     else:
         st.warning("No face detected. Please try again.")
