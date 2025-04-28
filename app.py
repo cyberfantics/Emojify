@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from keras.models import load_model
 from PIL import Image
+import random
 
 # Load the pre-trained emotion model
 emotion_model = load_model('emotion_model.h5')
@@ -20,7 +21,7 @@ emoji_dist = {
 }
 
 # Streamlit UI
-st.title("Photo to Emoji - Emotion Detection")
+st.title("Emojify - Emotion Detection")
 st.write("Upload an image or use your webcam to detect emotions and display corresponding emojis.")
 
 # Webcam input
@@ -37,31 +38,25 @@ if image_file is not None:
 
     if len(faces) > 0:
         x, y, w, h = faces[0]
-        roi_gray = gray_frame[y:y+h, x:x+w]  # Extract face in grayscale
-        resized_img = cv2.resize(roi_gray, (48, 48))  # Resize to 48x48
-        resized_img = resized_img / 255.0  # Normalize pixel values
-        resized_img = resized_img.reshape(1, 48, 48, 1)  # Add batch and channel dimensions
+        roi_color = image[y:y+h, x:x+w]  # Extract face in color
+
+        # Resize to match model's expected input (224x224x3)
+        resized_img = cv2.resize(roi_color, (224, 224))
+        resized_img = np.expand_dims(resized_img, axis=0)  # Add batch dimension
 
         # Make emotion prediction
         prediction = emotion_model.predict(resized_img)
-        maxindex = int(np.argmax(prediction))
 
-        # Draw rectangle and label on the image
-        image_with_rectangle = image.copy()
-        cv2.rectangle(image_with_rectangle, (x, y), (x+w, y+h), (0, 255, 0), 2)
-        cv2.putText(
-            image_with_rectangle, 
-            emotion_dict[maxindex], 
-            (x, y-10), 
-            cv2.FONT_HERSHEY_SIMPLEX, 
-            1, 
-            (0, 255, 0), 
-            2, 
-            cv2.LINE_AA
-        )
+        # Get the top 3 predicted emotions
+        top_3_indices = np.argsort(prediction[0])[-3:]  # Get the indices of the top 3 emotions
+        top_3_emotions = [emotion_dict[i] for i in top_3_indices]  # Map to emotion names
 
-        # Show the results
-        st.image(image_with_rectangle, caption=f"Detected Emotion: {emotion_dict[maxindex]}", use_column_width=True)
-        st.image(emoji_dist[maxindex], caption=f"Emoji: {emotion_dict[maxindex]}", width=200)
+        # Randomly select one of the top 3 emotions
+        detect_emotion = random.choice(top_3_emotions)
+
+        # Display results
+        st.image(image, caption=f"Detected Emotion: {detect_emotion}", use_column_width=True)
+        st.image(emoji_dist[top_3_indices[np.where(top_3_emotions == detect_emotion)[0][0]]], 
+                 caption=f"Emoji: {detect_emotion}", width=200)
     else:
         st.warning("No face detected. Please try again.")
